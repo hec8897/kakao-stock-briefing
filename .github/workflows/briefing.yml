@@ -1,0 +1,30 @@
+name: 관심종목 카카오 브리핑
+
+on:
+  schedule:
+    # 한국시간(KST) 평일 오전 8시 = UTC 전날 23시
+    # UTC 일~목(0-4) 23:00 = KST 월~금 08:00
+    - cron: "0 23 * * 0-4"
+  # 수동 실행 버튼 (테스트용)
+  workflow_dispatch:
+
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm start
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          ENABLE_AI: ${{ secrets.ENABLE_AI }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}

@@ -1,0 +1,22 @@
+{
+  "name": "kakao-stock-briefing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "매일 아침 관심종목을 카카오톡 '나에게 보내기'로 브리핑하는 AI 에이전트",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "auth": "tsx scripts/auth.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
+    "dotenv": "^16.4.7",
+    "yahoo-finance2": "^2.13.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
