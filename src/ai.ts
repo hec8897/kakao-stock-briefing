@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { config } from "./config.js";
 import type { Quote } from "./stocks.js";
 
@@ -6,11 +6,11 @@ import type { Quote } from "./stocks.js";
  * 관심종목에 대한 (1) 종목별 최신 뉴스 한줄 요약과 (2) 전체 시황 코멘트를
  * 웹 검색을 활용해 한국어로 생성합니다.
  *
- * Anthropic API의 server-side web_search 도구를 사용하므로
+ * OpenAI Responses API의 web_search 도구를 사용하므로
  * 별도의 뉴스 API 키가 필요 없습니다. (웹 검색은 별도 과금됨)
  */
 export async function generateBriefing(quotes: Quote[]): Promise<string> {
-  const client = new Anthropic({ apiKey: config.anthropic.apiKey });
+  const client = new OpenAI({ apiKey: config.openai.apiKey });
 
   const stockList = quotes
     .map((q) => `- ${q.name} (${q.symbol}): ${q.changePercent >= 0 ? "+" : ""}${q.changePercent.toFixed(2)}%`)
@@ -36,26 +36,13 @@ ${stockList}
 - 매수/매도를 추천하거나 단정적 전망을 하지 마세요.
 - 사실에 기반해 간결하게, 군더더기 없이 작성하세요.`;
 
-  const response = await client.messages.create({
-    model: config.anthropic.model,
-    max_tokens: 1500,
+  const response = await client.responses.create({
+    model: config.openai.model,
     // server-side 웹 검색 도구
-    tools: [
-      {
-        type: "web_search_20250305",
-        name: "web_search",
-        max_uses: 8,
-      },
-    ],
-    messages: [{ role: "user", content: prompt }],
+    tools: [{ type: "web_search" }],
+    input: prompt,
   });
 
-  // 최종 텍스트 블록만 모아서 반환 (검색 중간 블록 제외)
-  let text = "";
-  for (const block of response.content) {
-    if (block.type === "text") {
-      text += block.text;
-    }
-  }
-  return text.trim();
+  // 최종 텍스트만 모아서 반환 (검색 호출 등 비텍스트 블록 제외)
+  return response.output_text.trim();
 }

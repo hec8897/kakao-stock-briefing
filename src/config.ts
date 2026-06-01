@@ -30,15 +30,18 @@ function required(key: string): string {
   return value;
 }
 
+/** AI 뉴스·코멘트 사용 여부 (ENABLE_AI=false 면 가격 정보만 전송) */
+const enableAi = process.env.ENABLE_AI !== "false";
+
 export const config = {
-  anthropic: {
-    apiKey: required("ANTHROPIC_API_KEY"),
-    model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6",
+  openai: {
+    // AI를 쓸 때만 키를 강제합니다. (ENABLE_AI=false 면 가격 정보만 전송하므로 불필요)
+    apiKey: enableAi ? required("OPENAI_API_KEY") : (process.env.OPENAI_API_KEY ?? ""),
+    model: process.env.OPENAI_MODEL ?? "gpt-4.1",
   },
   kakao: {
     restApiKey: required("KAKAO_REST_API_KEY"),
     refreshToken: required("KAKAO_REFRESH_TOKEN"),
   },
-  /** AI 뉴스·코멘트 사용 여부 (ENABLE_AI=false 면 가격 정보만 전송) */
-  enableAi: process.env.ENABLE_AI !== "false",
+  enableAi,
 };

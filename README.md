@@ -15,7 +15,7 @@
 GitHub Actions(매일 08:00 KST)
    └─ npm start (src/index.ts)
         1. Yahoo Finance에서 관심종목 시세 수집        → src/stocks.ts
-        2. Anthropic API(웹검색)로 뉴스요약·시황코멘트 → src/ai.ts
+        2. OpenAI API(웹검색)로 뉴스요약·시황코멘트   → src/ai.ts
         3. 메시지 조립 + 200자 단위 분할              → src/format.ts
         4. 카카오 토큰 갱신 후 '나에게 보내기' 전송    → src/kakao.ts
 ```
@@ -24,7 +24,7 @@ GitHub Actions(매일 08:00 KST)
 |------|------|
 | `src/config.ts` | 관심종목 목록 + 환경변수 |
 | `src/stocks.ts` | yahoo-finance2 시세 조회 |
-| `src/ai.ts` | Claude + 웹검색으로 뉴스·코멘트 생성 |
+| `src/ai.ts` | OpenAI + 웹검색으로 뉴스·코멘트 생성 |
 | `src/kakao.ts` | 카카오 토큰 갱신 / 메시지 전송 |
 | `src/format.ts` | 메시지 포맷팅 + 200자 분할 |
 | `src/index.ts` | 전체 흐름 실행 |
@@ -37,7 +37,7 @@ GitHub Actions(매일 08:00 KST)
 ### 0. 사전 준비
 
 - Node.js 20 이상
-- [Anthropic API 키](https://console.anthropic.com) (뉴스·코멘트용, 사용량 과금)
+- [OpenAI API 키](https://platform.openai.com/api-keys) (뉴스·코멘트용, 사용량 과금)
 - 카카오 계정
 
 ```bash
@@ -65,9 +65,9 @@ npm run auth
 > refresh_token은 약 2개월간 유효합니다. 매 실행 시 access_token을 자동 갱신하며,
 > 만료가 임박하면 새 refresh_token이 발급되는데, 이때는 로그에 안내된 값으로 교체하면 됩니다.
 
-### 3. Anthropic 키 설정
+### 3. OpenAI 키 설정
 
-`.env`에 `ANTHROPIC_API_KEY`를 입력합니다.
+`.env`에 `OPENAI_API_KEY`를 입력합니다.
 뉴스·코멘트가 필요 없으면 `ENABLE_AI=false`로 두면 가격 정보만 전송됩니다.
 
 ### 4. 관심종목 수정
@@ -98,10 +98,10 @@ npm start
 
 1. 이 폴더를 GitHub 저장소(private 권장)에 push
 2. 저장소 **Settings > Secrets and variables > Actions > New repository secret** 에 등록:
-   - `ANTHROPIC_API_KEY`
+   - `OPENAI_API_KEY`
    - `KAKAO_REST_API_KEY`
    - `KAKAO_REFRESH_TOKEN`
-   - (선택) `ANTHROPIC_MODEL`, `ENABLE_AI`
+   - (선택) `OPENAI_MODEL`, `ENABLE_AI`
 3. `.github/workflows/briefing.yml`이 **평일 오전 8시(KST)** 자동 실행합니다.
    - **Actions 탭 > Run workflow** 로 수동 테스트 가능
    - 시간 변경: `cron` 값 수정 (UTC 기준. KST = UTC+9)
@@ -115,7 +115,7 @@ npm start
 - **카카오 텍스트 메시지는 200자 제한**이 있어, 브리핑이 길면 여러 개로 쪼개 전송됩니다.
 - **시세 데이터**는 Yahoo Finance 비공식 API라 종목/시장에 따라 지연되거나 누락될 수 있습니다. 투자 판단의 근거로 삼지 마세요.
 - **AI 코멘트는 참고용**입니다. 매수/매도 추천이 아니며, 웹검색 결과의 정확성은 보장되지 않습니다.
-- 웹검색은 Anthropic API에서 **별도 과금**됩니다. 비용이 부담되면 `ENABLE_AI=false`.
+- 웹검색은 OpenAI API에서 **별도 과금**됩니다. 비용이 부담되면 `ENABLE_AI=false`.
 
 ---
 
