@@ -1,7 +1,11 @@
 import "dotenv/config";
 
 export interface Stock {
-  /** Yahoo Finance 티커. 한국 주식은 .KS(코스피)/.KQ(코스닥) 접미사를 붙입니다. */
+  /**
+   * 네이버 금융 심볼.
+   *   국내: 6자리 종목코드 (삼성전자 005930, 카카오 035720)
+   *   해외: 심볼.거래소 (나스닥 .O / 뉴욕 .K) — AAPL.O, NVDA.O, TSLA.O
+   */
   symbol: string;
   /** 브리핑에 표시할 이름 */
   name: string;
@@ -9,17 +13,16 @@ export interface Stock {
 
 /**
  * 관심종목 목록 — 여기만 수정하면 됩니다.
- * 티커 찾는 법: finance.yahoo.com 에서 종목 검색 후 심볼 확인.
- *   삼성전자 005930.KS / 카카오 035720.KS / 에코프로 086520.KQ(코스닥)
- *   Apple AAPL / NVIDIA NVDA / Tesla TSLA
+ * 티커 찾는 법: finance.naver.com 에서 종목 검색 후 URL/심볼 확인.
+ *   국내는 6자리 숫자 코드, 해외는 "심볼.거래소"(나스닥 .O, 뉴욕증시 .K).
  */
 export const WATCHLIST: Stock[] = [
-  { symbol: "005930.KS", name: "삼성전자" },
-  { symbol: "000660.KS", name: "SK하이닉스" },
-  { symbol: "035720.KS", name: "카카오" },
-  { symbol: "AAPL", name: "Apple" },
-  { symbol: "NVDA", name: "NVIDIA" },
-  { symbol: "TSLA", name: "Tesla" },
+  { symbol: "005930", name: "삼성전자" },
+  { symbol: "000660", name: "SK하이닉스" },
+  { symbol: "035720", name: "카카오" },
+  { symbol: "AAPL.O", name: "Apple" },
+  { symbol: "NVDA.O", name: "NVIDIA" },
+  { symbol: "TSLA.O", name: "Tesla" },
 ];
 
 function required(key: string): string {
@@ -42,6 +45,16 @@ export const config = {
   kakao: {
     restApiKey: required("KAKAO_REST_API_KEY"),
     refreshToken: required("KAKAO_REFRESH_TOKEN"),
+    // Client Secret을 "사용함"으로 켰을 때만 필요. 꺼져 있으면 빈 값으로 두면 됩니다.
+    clientSecret: process.env.KAKAO_CLIENT_SECRET ?? "",
+  },
+  // 네이버 메일 (SMTP). 셋이 모두 있으면 메일도 함께 발송, 없으면 건너뜀.
+  // MAIL_USER: 네이버 아이디(@naver.com 포함) / MAIL_PASS: 네이버 메일 앱 비밀번호
+  // MAIL_TO: 받을 주소(미설정 시 MAIL_USER 본인에게)
+  mail: {
+    user: process.env.MAIL_USER ?? "",
+    pass: process.env.MAIL_PASS ?? "",
+    to: process.env.MAIL_TO || process.env.MAIL_USER || "",
   },
   enableAi,
 };

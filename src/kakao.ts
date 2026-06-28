@@ -12,14 +12,18 @@ interface TokenResponse {
  * access_token은 약 6시간, refresh_token은 약 2개월간 유효합니다.
  */
 export async function refreshAccessToken(): Promise<string> {
+  const params = new URLSearchParams({
+    grant_type: "refresh_token",
+    client_id: config.kakao.restApiKey,
+    refresh_token: config.kakao.refreshToken,
+  });
+  // Client Secret을 사용 중이면 함께 전송 (KOE010 방지)
+  if (config.kakao.clientSecret) params.set("client_secret", config.kakao.clientSecret);
+
   const res = await fetch("https://kauth.kakao.com/oauth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      client_id: config.kakao.restApiKey,
-      refresh_token: config.kakao.refreshToken,
-    }),
+    body: params,
   });
 
   if (!res.ok) {

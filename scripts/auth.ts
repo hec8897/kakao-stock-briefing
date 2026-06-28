@@ -15,7 +15,7 @@ import "dotenv/config";
  */
 
 const REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-const PORT = 5000;
+const PORT = 5001;
 const REDIRECT_URI = `http://localhost:${PORT}/oauth`;
 
 if (!REST_API_KEY) {
@@ -44,15 +44,21 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    const tokenParams = new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: REST_API_KEY,
+      redirect_uri: REDIRECT_URI,
+      code,
+    });
+    // Client Secret을 사용 중이면 함께 전송 (KOE010 방지)
+    if (process.env.KAKAO_CLIENT_SECRET) {
+      tokenParams.set("client_secret", process.env.KAKAO_CLIENT_SECRET);
+    }
+
     const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: REST_API_KEY,
-        redirect_uri: REDIRECT_URI,
-        code,
-      }),
+      body: tokenParams,
     });
 
     const data = (await tokenRes.json()) as Record<string, unknown>;
