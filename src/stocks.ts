@@ -17,6 +17,18 @@ export interface Quote {
   changePercent: number;
   /** 통화 코드 (KRW, USD 등) */
   currency: string;
+  /** 브리핑에서 묶을 카테고리(섹터) */
+  category: string;
+}
+
+/** 시세를 카테고리별로 묶습니다(WATCHLIST 순서 유지). */
+export function groupByCategory(quotes: Quote[]): [string, Quote[]][] {
+  const groups = new Map<string, Quote[]>();
+  for (const q of quotes) {
+    if (!groups.has(q.category)) groups.set(q.category, []);
+    groups.get(q.category)!.push(q);
+  }
+  return [...groups];
 }
 
 const UA = "Mozilla/5.0";
@@ -56,6 +68,7 @@ async function fetchDomestic(stock: Stock): Promise<Quote> {
     change,
     changePercent: signed(toNumber(d.fluctuationsRatio), d.compareToPreviousPrice),
     currency: "KRW",
+    category: stock.category,
   };
 }
 
@@ -71,6 +84,7 @@ async function fetchOverseas(stock: Stock): Promise<Quote> {
     change,
     changePercent: signed(toNumber(d.fluctuationsRatio), d.compareToPreviousPrice),
     currency: "USD",
+    category: stock.category,
   };
 }
 

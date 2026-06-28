@@ -9,6 +9,8 @@ export interface Stock {
   symbol: string;
   /** 브리핑에 표시할 이름 */
   name: string;
+  /** 브리핑에서 묶을 카테고리(섹터) */
+  category: string;
 }
 
 /**
@@ -16,40 +18,42 @@ export interface Stock {
  * 티커 찾는 법: finance.naver.com 에서 종목 검색 후 URL/심볼 확인.
  *   국내는 6자리 숫자 코드, 해외는 "심볼.거래소"(나스닥 .O, 뉴욕증시 .K).
  */
+const KR_SEMI = "국내 반도체";
+const US_SEMI = "미국 반도체";
+const SPACE = "우주·방산";
+const ETC = "그 외";
+
 export const WATCHLIST: Stock[] = [
-  // 국내 반도체
-  { symbol: "005930", name: "삼성전자" },
-  { symbol: "000660", name: "SK하이닉스" },
-  { symbol: "042700", name: "한미반도체" },
-  { symbol: "000990", name: "DB하이텍" },
-  { symbol: "058470", name: "리노공업" },
-  { symbol: "039030", name: "이오테크닉스" },
-  { symbol: "403870", name: "HPSP" },
-  { symbol: "240810", name: "원익IPS" },
-  { symbol: "036930", name: "주성엔지니어링" },
-  { symbol: "067310", name: "하나마이크론" },
-  // 미국 반도체
-  { symbol: "NVDA.O", name: "NVIDIA" },
-  { symbol: "AMD.O", name: "AMD" },
-  { symbol: "INTC.O", name: "Intel" },
-  { symbol: "MU.O", name: "Micron" },
-  { symbol: "AVGO.O", name: "Broadcom" },
-  { symbol: "QCOM.O", name: "Qualcomm" },
-  { symbol: "TSM", name: "TSMC" },
-  { symbol: "ASML.O", name: "ASML" },
-  { symbol: "AMAT.O", name: "Applied Materials" },
-  { symbol: "LRCX.O", name: "Lam Research" },
-  { symbol: "KLAC.O", name: "KLA" },
-  { symbol: "TXN.O", name: "Texas Instruments" },
-  { symbol: "ARM.O", name: "ARM" },
-  { symbol: "MRVL.O", name: "Marvell" },
-  // 추가 관심종목
-  { symbol: "SPCX.O", name: "SpaceX" },
-  { symbol: "RKLB.O", name: "Rocket Lab" },
-  { symbol: "PLTR.O", name: "Palantir" },
-  { symbol: "035420", name: "네이버" },
-  { symbol: "267260", name: "HD현대일렉트릭" },
-  { symbol: "298040", name: "효성중공업" },
+  { symbol: "005930", name: "삼성전자", category: KR_SEMI },
+  { symbol: "000660", name: "SK하이닉스", category: KR_SEMI },
+  { symbol: "042700", name: "한미반도체", category: KR_SEMI },
+  { symbol: "000990", name: "DB하이텍", category: KR_SEMI },
+  { symbol: "058470", name: "리노공업", category: KR_SEMI },
+  { symbol: "039030", name: "이오테크닉스", category: KR_SEMI },
+  { symbol: "403870", name: "HPSP", category: KR_SEMI },
+  { symbol: "240810", name: "원익IPS", category: KR_SEMI },
+  { symbol: "036930", name: "주성엔지니어링", category: KR_SEMI },
+  { symbol: "067310", name: "하나마이크론", category: KR_SEMI },
+  { symbol: "NVDA.O", name: "NVIDIA", category: US_SEMI },
+  { symbol: "AMD.O", name: "AMD", category: US_SEMI },
+  { symbol: "INTC.O", name: "Intel", category: US_SEMI },
+  { symbol: "MU.O", name: "Micron", category: US_SEMI },
+  { symbol: "AVGO.O", name: "Broadcom", category: US_SEMI },
+  { symbol: "QCOM.O", name: "Qualcomm", category: US_SEMI },
+  { symbol: "TSM", name: "TSMC", category: US_SEMI },
+  { symbol: "ASML.O", name: "ASML", category: US_SEMI },
+  { symbol: "AMAT.O", name: "Applied Materials", category: US_SEMI },
+  { symbol: "LRCX.O", name: "Lam Research", category: US_SEMI },
+  { symbol: "KLAC.O", name: "KLA", category: US_SEMI },
+  { symbol: "TXN.O", name: "Texas Instruments", category: US_SEMI },
+  { symbol: "ARM.O", name: "ARM", category: US_SEMI },
+  { symbol: "MRVL.O", name: "Marvell", category: US_SEMI },
+  { symbol: "SPCX.O", name: "SpaceX", category: SPACE },
+  { symbol: "RKLB.O", name: "Rocket Lab", category: SPACE },
+  { symbol: "PLTR.O", name: "Palantir", category: ETC },
+  { symbol: "035420", name: "네이버", category: ETC },
+  { symbol: "267260", name: "HD현대일렉트릭", category: ETC },
+  { symbol: "298040", name: "효성중공업", category: ETC },
 ];
 
 function required(key: string): string {

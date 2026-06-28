@@ -1,4 +1,4 @@
-import type { Quote } from "./stocks.js";
+import { groupByCategory, type Quote } from "./stocks.js";
 
 /** 통화에 맞춰 가격을 포맷합니다. */
 function formatPrice(value: number, currency: string): string {
@@ -14,14 +14,19 @@ function arrow(changePercent: number): string {
   return "➖";
 }
 
-/** 종목별 가격·등락률 섹션 텍스트를 만듭니다. */
+/** 종목별 가격·등락률 섹션 텍스트를 카테고리별로 묶어 만듭니다. */
 export function formatPriceSection(quotes: Quote[]): string {
-  return quotes
-    .map((q) => {
-      const sign = q.changePercent > 0 ? "+" : "";
-      return `${arrow(q.changePercent)} ${q.name} ${formatPrice(q.price, q.currency)} (${sign}${q.changePercent.toFixed(2)}%)`;
+  return groupByCategory(quotes)
+    .map(([category, group]) => {
+      const lines = group
+        .map((q) => {
+          const sign = q.changePercent > 0 ? "+" : "";
+          return `${arrow(q.changePercent)} ${q.name} ${formatPrice(q.price, q.currency)} (${sign}${q.changePercent.toFixed(2)}%)`;
+        })
+        .join("\n");
+      return `【${category}】\n${lines}`;
     })
-    .join("\n");
+    .join("\n\n");
 }
 
 /**

@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { config } from "./config.js";
-import type { Quote } from "./stocks.js";
+import { groupByCategory, type Quote } from "./stocks.js";
 
 /** 메일 설정(아이디/비번/수신처)이 모두 있을 때만 발송 대상. */
 export const mailEnabled = Boolean(config.mail.user && config.mail.pass && config.mail.to);
@@ -22,17 +22,23 @@ function tone(pct: number): { color: string; arrow: string } {
   return { color: "#868e96", arrow: "―" };
 }
 
-/** 종목 시세 테이블 행. */
+/** 종목 시세 테이블 행 — 카테고리 헤더 + 종목 행. */
 function quoteRows(quotes: Quote[]): string {
-  return quotes
-    .map((q) => {
-      const { color, arrow } = tone(q.changePercent);
-      const sign = q.changePercent > 0 ? "+" : "";
-      return `<tr>
+  return groupByCategory(quotes)
+    .map(([category, group]) => {
+      const header = `<tr><td colspan="3" style="padding:14px 12px 6px;font-weight:700;color:#228be6;font-size:13px;">${escapeHtml(category)}</td></tr>`;
+      const rows = group
+        .map((q) => {
+          const { color, arrow } = tone(q.changePercent);
+          const sign = q.changePercent > 0 ? "+" : "";
+          return `<tr>
   <td style="padding:10px 12px;border-bottom:1px solid #f1f3f5;font-weight:600;color:#212529;">${escapeHtml(q.name)}</td>
   <td style="padding:10px 12px;border-bottom:1px solid #f1f3f5;text-align:right;color:#212529;">${formatPrice(q)}</td>
   <td style="padding:10px 12px;border-bottom:1px solid #f1f3f5;text-align:right;color:${color};font-weight:600;white-space:nowrap;">${arrow} ${sign}${q.changePercent.toFixed(2)}%</td>
 </tr>`;
+        })
+        .join("\n");
+      return header + "\n" + rows;
     })
     .join("\n");
 }
