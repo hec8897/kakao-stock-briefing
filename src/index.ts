@@ -1,7 +1,7 @@
 import { WATCHLIST, config } from "./config.js";
 import { fetchQuotes } from "./stocks.js";
 import { generateBriefing } from "./ai.js";
-import { formatPriceSection, splitForKakao } from "./format.js";
+import { formatPriceSection, formatKakaoSummary, splitForKakao } from "./format.js";
 import { sendMessages } from "./kakao.js";
 import { mailEnabled, buildHtml, sendEmail } from "./email.js";
 
@@ -32,14 +32,18 @@ async function main(): Promise<void> {
     }
   }
 
-  const body = `📈 ${title}\n\n${formatPriceSection(quotes)}${aiText ? `\n\n${aiText}` : ""}`;
+  // 메일은 전체(종목별 시세·뉴스), 카카오는 요약만 — 메시지 분할 폭증 방지.
+  const fullBody = `📈 ${title}\n\n${formatPriceSection(quotes)}${aiText ? `\n\n${aiText}` : ""}`;
+  const kakaoBody =
+    formatKakaoSummary(title, quotes, aiText) +
+    (mailEnabled ? "\n\n📧 종목별 상세·뉴스는 메일을 확인하세요." : `\n\n${formatPriceSection(quotes)}`);
 
   // 3) 발송 — 카카오/메일 각각 독립 실행해 하나가 실패해도 다른 채널은 전송.
   const tasks: Promise<void>[] = [];
 
   tasks.push(
     (async () => {
-      const chunks = splitForKakao(body);
+      const chunks = splitForKakao(kakaoBody);
       console.log(`카카오톡 전송 중... (${chunks.length}개 메시지)`);
       await sendMessages(chunks);
       console.log("✅ 카카오톡 전송 완료");
@@ -50,7 +54,7 @@ async function main(): Promise<void> {
     tasks.push(
       (async () => {
         console.log("메일 전송 중...");
-        await sendEmail(`📈 ${title}`, buildHtml(title, quotes, aiText), body);
+        await sendEmail(`📈 ${title}`, buildHtml(title, quotes, aiText), fullBody);
         console.log("✅ 메일 전송 완료");
       })(),
     );
