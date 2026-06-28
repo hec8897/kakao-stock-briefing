@@ -44,8 +44,11 @@ function quoteRows(quotes: Quote[]): string {
 function aiBlock(aiText: string): string {
   if (!aiText) return "";
   const safe = escapeHtml(aiText)
+    .replace(/^\[지수\]\s*$/gm, '<div style="font-weight:700;color:#495057;margin:16px 0 6px;">📊 마감 지수</div>')
     .replace(/^\[뉴스\]\s*$/gm, '<div style="font-weight:700;color:#495057;margin:16px 0 6px;">📰 뉴스</div>')
     .replace(/^\[코멘트\]\s*$/gm, '<div style="font-weight:700;color:#495057;margin:16px 0 6px;">💬 시황 코멘트</div>')
+    .replace(/^《(.+)》\s*$/gm, '<div style="font-weight:600;color:#228be6;margin:10px 0 2px;">$1</div>')
+    .replace(/^→\s*(.+)$/gm, '<div style="padding:3px 0;color:#868e96;font-style:italic;">↳ $1</div>')
     .replace(/^[•·-]\s*(.+)$/gm, '<div style="padding:3px 0;color:#343a40;">• $1</div>')
     .replace(/\n/g, "<br>");
   return `<div style="margin-top:20px;font-size:14px;line-height:1.6;">${safe}</div>`;

@@ -12,22 +12,41 @@ import type { Quote } from "./stocks.js";
 export async function generateBriefing(quotes: Quote[]): Promise<string> {
   const client = new OpenAI({ apiKey: config.openai.apiKey });
 
+  // 모델이 학습 시점 날짜로 착각하지 않도록 실제 오늘/일주일 전 날짜(KST)를 주입한다.
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+  const now = new Date();
+  const today = fmt(now);
+  const weekAgo = fmt(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000));
+
   const stockList = quotes
     .map((q) => `- ${q.name} (${q.symbol}): ${q.changePercent >= 0 ? "+" : ""}${q.changePercent.toFixed(2)}%`)
     .join("\n");
 
-  const prompt = `당신은 한국어 주식 브리핑 어시스턴트입니다. 아래는 오늘 사용자의 관심종목과 전일 대비 등락률입니다.
+  const prompt = `당신은 한국어 주식 브리핑 어시스턴트입니다. 아래는 사용자의 관심종목과 전일 대비 등락률입니다.
 
 ${stockList}
 
-다음을 수행하세요.
-1. 각 종목별로 최근 1~2일 내 주요 뉴스를 웹에서 검색해 핵심을 40자 이내 한 줄로 요약합니다. 관련 뉴스가 없으면 생략합니다.
-2. 마지막에 전체 포트폴리오 관점의 시황 코멘트를 2~3문장으로 작성합니다.
+⚠️ 오늘은 ${today}입니다. 반드시 ${weekAgo}부터 ${today}까지 최근 일주일 이내에 보도된 뉴스만 수집하세요. 그보다 오래된 뉴스는 절대 포함하지 마세요. 각 뉴스의 보도 날짜를 웹 검색으로 확인하세요.
 
-출력 형식(다른 말 없이 이 형식만):
+다음을 수행하세요.
+1. 가장 최근 마감 기준 주요 지수(KOSPI, KOSDAQ, S&P 500, 나스닥)의 종가와 전일 대비 등락률을 웹에서 검색해 요약하고, 그 지수를 움직인 핵심 이슈(매크로·정책·실적 등)를 1~2줄로 정리합니다.
+2. 각 종목의 최근 일주일 주요 뉴스를 웹에서 검색해 핵심을 40자 이내 한 줄로 요약합니다. 관련 뉴스가 없으면 생략합니다.
+3. 뉴스를 종목별이 아니라 카테고리(섹터/테마)로 묶어 정리합니다. 예: 국내 반도체 / 미국 반도체 / 우주·방산 / 그 외. 종목 구성에 맞게 카테고리를 정하세요.
+4. 마지막에 전체 포트폴리오 관점의 시황 코멘트를 2~3문장으로 작성합니다.
+
+출력 형식(다른 말 없이 이 형식만, 날짜는 MM/DD):
+[지수]
+• KOSPI 0,000.00 (±0.00%)
+• 나스닥 00,000.00 (±0.00%)
+→ 지수를 움직인 핵심 이슈 1~2줄
+
 [뉴스]
-• 종목명: 한줄요약
-• 종목명: 한줄요약
+《카테고리명》
+• 종목명: 한줄요약 (MM/DD)
+• 종목명: 한줄요약 (MM/DD)
+《카테고리명》
+• 종목명: 한줄요약 (MM/DD)
 
 [코멘트]
 시황 코멘트
